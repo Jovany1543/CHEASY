@@ -3,7 +3,8 @@ import os
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+base_url = os.getenv('BACKEND_URL')
 
 LOGIN_TEMPLATE = '''
 <!DOCTYPE html>
@@ -59,7 +60,7 @@ DASHBOARD_TEMPLATE = '''
     <div class="navbar">
         <h1>CHEASY Backend Dashboard</h1>
         <div>
-            <a href="/admin" class="admin-link">Admin Panel</a>
+            <a href="{{ base_url }}/admin/" class="admin-link">Admin Panel</a>
             <a href="/admin-logout" class="admin-link logout">Logout</a>
         </div>
     </div>
@@ -68,8 +69,8 @@ DASHBOARD_TEMPLATE = '''
         <div class="section">
             <h2>Public Endpoints (No Auth Required)</h2>
             <ul class="endpoint-list">
-                <li><a href="http://localhost:5000/api/ping" target="_blank">GET /api/ping</a> - Health check</li>
-                <li><a href="http://localhost:5000/api/users" target="_blank">GET /api/users</a> - List all users</li>
+                <li><a href="{{ base_url }}/api/ping" target="_blank">GET /api/ping</a> - Health check</li>
+                <li><a href="{{ base_url }}/api/users" target="_blank">GET /api/users</a> - List all users</li>
             </ul>
         </div>
 
@@ -92,7 +93,7 @@ DASHBOARD_TEMPLATE = '''
 
         <div class="section">
             <h2>Database Management</h2>
-            <p><a href="/admin" class="admin-link">Go to Admin Panel</a> - Manage users and items in the database</p>
+            <p><a href="{{ base_url }}/admin/" class="admin-link">Go to Admin Panel</a> - Manage users and items in the database</p>
         </div>
     </div>
 </body>
@@ -103,7 +104,7 @@ DASHBOARD_TEMPLATE = '''
 def index():
     # Check if user is authenticated
     if request.cookies.get('admin_authenticated'):
-        return render_template_string(DASHBOARD_TEMPLATE)
+        return render_template_string(DASHBOARD_TEMPLATE, base_url=base_url)
     return redirect('/admin-login')
 
 @dashboard_bp.route('/admin-login', methods=['GET', 'POST'])

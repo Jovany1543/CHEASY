@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "==2.3.3"
+flask-cors = "==3.0.10"
+flask-sqlalchemy = "==3.0.3"
+flask-migrate = "==4.0.5"
+flask-jwt-extended = "==4.4.4"
+flask-admin = "==1.6.1"
+python-dotenv = "==1.0.0"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
+
+[scripts]
+start = "python app.py"
+init = "flask db init"
+migrate = "flask db migrate"
+upgrade = "flask db upgrade"
+resetdb = "bash -c 'rm -f instance/cheasy.db && python -c \"from app import app, db; app.app_context().push(); db.create_all()\"'"
+seed = "python seed.py"
+
+
