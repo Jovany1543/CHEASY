@@ -22,7 +22,7 @@ start = "python app.py"
 init = "flask db init"
 migrate = "flask db migrate"
 upgrade = "flask db upgrade"
-resetdb = "bash -c 'rm -f instance/cheasy.db && python -c \"from app import app, db; app.app_context().push(); db.create_all()\"'"
+resetdb = "python -c \"\nfrom app import app, db, create_db\n\nfrom models import User, Item\n\nwith app.app_context():\n    create_db()\n    db.session.query(Item).delete()\n    db.session.query(User).delete()\n    db.session.commit()\n    print('resetdb complete')\n\""
 seed = "python seed.py"
 
 

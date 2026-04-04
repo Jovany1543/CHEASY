@@ -4,13 +4,16 @@ Seed script to populate the database with dummy data for development.
 Run with: pipenv run seed
 """
 
-from app import app, db
+from app import app, db, create_db
 from models import User, Item
 
 def seed_database():
     """Populate the database with dummy users and items."""
     
     with app.app_context():
+        # Ensure tables exist
+        create_db()
+        
         # Clear existing data
         print("Clearing existing data...")
         db.session.query(Item).delete()
