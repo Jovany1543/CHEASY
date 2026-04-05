@@ -23,8 +23,14 @@ class ProtectedModelView(ModelView):
             return redirect('/admin-login')
         return super()._handle_view(name, **kwargs)
 
-def init_admin(app, db, User, Item):
+
+def init_admin(app, db, Teacher, Student, Course, Section, Assignment, Submission, Enrollment):
     admin = Admin(app, name='CHEASY Admin', index_view=PasswordProtectedAdminIndexView())
-    admin.add_view(ProtectedModelView(User, db.session, name='Users'))
-    admin.add_view(ProtectedModelView(Item, db.session, name='Items'))
+    admin.add_view(ProtectedModelView(Teacher, db.session, name='Teachers'))
+    admin.add_view(ProtectedModelView(Student, db.session, name='Students'))
+    admin.add_view(ProtectedModelView(Course, db.session, name='Courses'))
+    admin.add_view(ProtectedModelView(Section, db.session, name='Sections'))
+    admin.add_view(ProtectedModelView(Assignment, db.session, name='Assignments'))
+    admin.add_view(ProtectedModelView(Submission, db.session, name='Submissions'))
+    admin.add_view(ProtectedModelView(Enrollment, db.session, name='Enrollments'))
     return admin

@@ -9,8 +9,8 @@ flask-cors = "==3.0.10"
 flask-sqlalchemy = "==3.0.3"
 flask-migrate = "==4.0.5"
 flask-jwt-extended = "==4.4.4"
-flask-admin = "==1.6.1"
 python-dotenv = "==1.0.0"
+flask-admin = "==2.0.2"
 
 [dev-packages]
 
@@ -24,5 +24,3 @@ migrate = "flask db migrate"
 upgrade = "flask db upgrade"
 resetdb = "python -c \"\nfrom app import app, db, create_db\n\nfrom models import User, Item\n\nwith app.app_context():\n    create_db()\n    db.session.query(Item).delete()\n    db.session.query(User).delete()\n    db.session.commit()\n    print('resetdb complete')\n\""
 seed = "python seed.py"
-
-
