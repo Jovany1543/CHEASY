@@ -1,39 +1,49 @@
 {
-	"name": "CHEASY",
-	"image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
-	"features": {
-		"ghcr.io/devcontainers/features/node:1": {
-			"version": "20"
-		}
-	},
-	"forwardPorts": [3000, 3001],
-	"portsAttributes": {
-		"3000": {
-			"label": "Frontend",
-			"onAutoForward": "openBrowserOnce",
-			"visibility": "public"
-		},
-		"3001": {
-			"label": "Backend",
-			"onAutoForward": "openBrowserOnce",
-			"visibility": "public"
-		}
-	},
-	"postCreateCommand": "bash -lc 'set -e; if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi; cd backend && python -m pip install --user pipenv && python -m pipenv sync; cd ../frontend && npm install'",
-	"postStartCommand": {
-		"backend": "bash -lc 'if ! ss -ltn | grep -q \":3001\\b\"; then cd backend && nohup python -m pipenv run python app.py >/tmp/cheasy-backend.log 2>&1 & fi'",
-		"frontend": "bash -lc 'if ! ss -ltn | grep -q \":3000\\b\"; then cd frontend && nohup npm start >/tmp/cheasy-frontend.log 2>&1 & fi'"
-	},
-	"customizations": {
-		"vscode": {
-			"settings": {
-				"task.allowAutomaticTasks": "on"
-			},
-			"extensions": [
-				"ms-python.python",
-				"ms-python.vscode-pylance",
-				"dbaeumer.vscode-eslint"
-			]
-		}
-	}
+  "name": "CHEASY",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "forwardPorts": [3000, 3001],
+  "portsAttributes": {
+    "3000": {
+      "label": "Frontend",
+      "onAutoForward": "openBrowserOnce"
+    },
+    "3001": {
+      "label": "Backend",
+      "onAutoForward": "openBrowserOnce"
+    }
+  },
+  "postCreateCommand": {
+    "env": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi",
+    "backend": "cd backend && python -m pip install --user pipenv && python -m pipenv sync",
+    "frontend": "cd frontend && npm install"
+  },
+  "postAttachCommand": {
+    "backend": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi && cd backend && python -m pipenv run python app.py",
+    "frontend": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi && cd frontend && npm start",
+    "openFrontend": "if [ -n \"$CODESPACE_NAME\" ] && [ -n \"$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN\" ]; then \"$BROWSER\" \"https://${CODESPACE_NAME}-3000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}\" >/dev/null 2>&1 || true; fi",
+    "openBackend": "if [ -n \"$CODESPACE_NAME\" ] && [ -n \"$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN\" ]; then \"$BROWSER\" \"https://${CODESPACE_NAME}-3001.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}\" >/dev/null 2>&1 || true; fi"
+  },
+  "postStartCommand": {
+    "makePortsPublic": "if command -v gh >/dev/null 2>&1 && [ -n \"$CODESPACE_NAME\" ]; then gh codespace ports visibility -c \"$CODESPACE_NAME\" 3000:public 3001:public >/dev/null 2>&1 || true; fi"
+  },
+  "waitFor": "postCreateCommand",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "task.allowAutomaticTasks": "on"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
 }
