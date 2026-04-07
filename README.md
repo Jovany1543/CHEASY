@@ -177,16 +177,18 @@ From `backend/`:
 
 ```bash
 python -m pip install --user pipenv
-python -m pipenv sync
-python -m pipenv run python app.py
+export PATH="$HOME/.local/bin:$PATH"
+pipenv sync
+pipenv run python app.py
 ```
 
 Useful backend commands:
 
 ```bash
-python -m pipenv run python seed.py
-python -m pipenv run flask db migrate
-python -m pipenv run flask db upgrade
+export PATH="$HOME/.local/bin:$PATH"
+pipenv run python seed.py
+pipenv run flask db migrate
+pipenv run flask db upgrade
 ```
 
 ### Frontend setup
@@ -220,7 +222,7 @@ Behavior:
 
 - VS Code is configured to allow automatic tasks in the workspace.
 - Opening the repo should start two tasks on folder open:
-	- backend: `python -m pipenv run python app.py`
+	- backend: `pipenv run python app.py`
 	- frontend: `npm start`
 - Two manual setup tasks also exist if dependencies are not installed yet.
 
@@ -295,7 +297,8 @@ Run:
 
 ```bash
 cd backend
-python -m pipenv run python seed.py
+export PATH="$HOME/.local/bin:$PATH"
+pipenv run python seed.py
 ```
 
 What it does:
@@ -372,9 +375,9 @@ If you are continuing work on CHEASY, the highest-value cleanup path is probably
 If you only need the shortest path to a running workspace:
 
 1. Copy `.env.example` to `.env` and set the correct values for your environment.
-2. Start the backend from `backend/` with `python -m pipenv run python app.py`.
+2. Start the backend from `backend/` with `pipenv run python app.py`.
 3. Start the frontend from `frontend/` with `npm start`.
-4. Optionally seed the database with `python -m pipenv run python seed.py`.
+4. Optionally seed the database with `pipenv run python seed.py`.
 5. Log in with one of the seeded accounts.
 
 ## Contribution Notes

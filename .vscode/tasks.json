@@ -7,7 +7,7 @@
       "command": "/bin/bash",
       "args": [
         "-lc",
-        "python -m pipenv run python app.py"
+        "export PATH=\"$HOME/.local/bin:$PATH\"; pipenv run python app.py"
       ],
       "options": {
         "cwd": "${workspaceFolder}/backend"
@@ -52,7 +52,7 @@
       "command": "/bin/bash",
       "args": [
         "-lc",
-        "python -m pip install --user pipenv && python -m pipenv sync"
+        "export PATH=\"$HOME/.local/bin:$PATH\"; if ! command -v pipenv >/dev/null 2>&1; then python -m pip install --user pipenv; fi; pipenv sync"
       ],
       "options": {
         "cwd": "${workspaceFolder}/backend"

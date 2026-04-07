@@ -9,19 +9,21 @@ ports:
 tasks:
   - name: Install dependencies
     init: |
+      export PATH="$HOME/.local/bin:$PATH"
       cd backend
-      python -m pip install --user pipenv
-      python -m pipenv sync
+      if ! command -v pipenv >/dev/null 2>&1; then python -m pip install --user pipenv; fi
+      pipenv sync
       cd ../frontend
       npm install
   - name: Backend
     command: |
+      export PATH="$HOME/.local/bin:$PATH"
       cd backend
-      python -m pipenv run python app.py
+      pipenv run python app.py
   - name: Frontend
     command: |
       cd frontend
-      npm start
+      BROWSER=none npm start
     openMode: split-right
 
 vscode:
