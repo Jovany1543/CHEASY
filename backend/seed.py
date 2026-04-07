@@ -112,26 +112,97 @@ def seed_database():
         courses_data = [
             {
                 'name': 'Intro to Cooking',
-                'description': 'Foundational kitchen skills and safety.',
-                'section_name': 'Knife Skills',
-                'section_description': 'Practice cuts, prep, and handling techniques.',
-                'assignment_title': 'Mise en Place Drill',
-                'assignment_description': 'Prepare ingredients for a three-course meal.',
+                'description': 'Foundational kitchen skills, safety, and fast-paced service prep.',
+                'sections': [
+                    {
+                        'name': 'Knife Skills',
+                        'description': 'Practice cuts, prep sequencing, and safe station setup.',
+                        'assignments': [
+                            {
+                                'title': 'Mise en Place Drill',
+                                'description': 'Prepare ingredients for a three-course meal under a time limit.',
+                            },
+                            {
+                                'title': 'Vegetable Precision Cuts',
+                                'description': 'Submit a prep log and plated sample of core knife cuts.',
+                            },
+                        ],
+                    },
+                    {
+                        'name': 'Stocks and Sauces',
+                        'description': 'Build flavor using foundational stocks, roux, and pan sauces.',
+                        'assignments': [
+                            {
+                                'title': 'Mother Sauce Tasting',
+                                'description': 'Prepare one mother sauce and explain its derivatives.',
+                            }
+                        ],
+                    },
+                ],
             },
             {
                 'name': 'Baking Basics',
-                'description': 'Essential doughs, batters, and oven technique.',
-                'section_name': 'Bread Fundamentals',
-                'section_description': 'Mixing, proofing, and shaping bread dough.',
-                'assignment_title': 'Bread Lab',
-                'assignment_description': 'Bake a basic loaf and document the process.',
+                'description': 'Essential doughs, batters, fermentation, and oven technique.',
+                'sections': [
+                    {
+                        'name': 'Bread Fundamentals',
+                        'description': 'Mixing, proofing, shaping, and scoring bread dough.',
+                        'assignments': [
+                            {
+                                'title': 'Bread Lab',
+                                'description': 'Bake a basic loaf and document the process from mix to crumb.',
+                            },
+                            {
+                                'title': 'Hydration Comparison',
+                                'description': 'Compare two dough hydrations and submit observations.',
+                            },
+                        ],
+                    },
+                    {
+                        'name': 'Pastry Basics',
+                        'description': 'Creaming, lamination, and temperature control in pastry work.',
+                        'assignments': [
+                            {
+                                'title': 'Cookie Texture Study',
+                                'description': 'Bake two cookie batches and explain the texture differences.',
+                            }
+                        ],
+                    },
+                ],
+            },
+            {
+                'name': 'Global Flavors',
+                'description': 'Ingredient pairing and technique across multiple culinary traditions.',
+                'sections': [
+                    {
+                        'name': 'Spice Foundations',
+                        'description': 'Toast, bloom, and layer spices for balanced dishes.',
+                        'assignments': [
+                            {
+                                'title': 'Spice Blend Workshop',
+                                'description': 'Create a custom spice blend and propose a dish around it.',
+                            }
+                        ],
+                    },
+                    {
+                        'name': 'Regional Menu Design',
+                        'description': 'Translate regional ingredients into a coherent small menu.',
+                        'assignments': [
+                            {
+                                'title': 'Three-Course Menu Draft',
+                                'description': 'Design a menu inspired by a single region and justify the pairings.',
+                            }
+                        ],
+                    },
+                ],
             },
         ]
         
         courses = []
         sections = []
         assignments = []
-        for index, course_data in enumerate(courses_data):
+        course_assignments = {}
+        for course_data in courses_data:
             course = Course(
                 name=course_data['name'],
                 description=course_data['description'],
@@ -139,51 +210,64 @@ def seed_database():
             db.session.add(course)
             db.session.flush()
 
-            section = Section(
-                name=course_data['section_name'],
-                description=course_data['section_description'],
-                course_id=course.id,
-            )
-            assignment = Assignment(
-                title=course_data['assignment_title'],
-                description=course_data['assignment_description'],
-                course_id=course.id,
-            )
-
             courses.append(course)
-            sections.append(section)
-            assignments.append(assignment)
-            db.session.add(section)
-            db.session.add(assignment)
+            course_assignments[course.id] = []
+
+            for section_data in course_data['sections']:
+                section = Section(
+                    name=section_data['name'],
+                    description=section_data['description'],
+                    course_id=course.id,
+                )
+                db.session.add(section)
+                db.session.flush()
+                sections.append(section)
+
+                for assignment_data in section_data['assignments']:
+                    assignment = Assignment(
+                        title=assignment_data['title'],
+                        description=assignment_data['description'],
+                        section_id=section.id,
+                    )
+                    assignments.append(assignment)
+                    course_assignments[course.id].append(assignment)
+                    db.session.add(assignment)
         
         db.session.commit()
         print(f"Created {len(courses)} courses")
+        print(f"Created {len(sections)} sections")
+        print(f"Created {len(assignments)} assignments")
 
         # Enroll students and add submissions
         print("Creating enrollments and submissions...")
         enrollments = []
         submissions = []
-        for index, student in enumerate(students):
-            course = courses[index % len(courses)]
-            teacher = teachers[index % len(teachers)]
-            assignment = assignments[index % len(assignments)]
+        sample_grades = ['A', 'A-', 'B+', 'B', None]
+        for student_index, student in enumerate(students):
+            for course_index, course in enumerate(courses):
+                teacher = teachers[(student_index + course_index) % len(teachers)]
 
-            enrollment = Enrollment(
-                teacher_id=teacher.id,
-                student_id=student.id,
-                course_id=course.id,
-            )
-            submission = Submission(
-                student_id=student.id,
-                assignment_id=assignment.id,
-                content=f"Submission by {student.username} for {assignment.title}",
-                grade='A' if index == 0 else None,
-            )
+                enrollment = Enrollment(
+                    teacher_id=teacher.id,
+                    student_id=student.id,
+                    course_id=course.id,
+                )
+                enrollments.append(enrollment)
+                db.session.add(enrollment)
 
-            enrollments.append(enrollment)
-            submissions.append(submission)
-            db.session.add(enrollment)
-            db.session.add(submission)
+                for assignment_index, assignment in enumerate(course_assignments[course.id]):
+                    submission = Submission(
+                        student_id=student.id,
+                        assignment_id=assignment.id,
+                        content=(
+                            f"{student.first_name} {student.last_name} completed {assignment.title} "
+                            f"for {course.name}."
+                        ),
+                        grade=sample_grades[(student_index + assignment_index + course_index) % len(sample_grades)],
+                    )
+
+                    submissions.append(submission)
+                    db.session.add(submission)
 
         db.session.commit()
         print(f"Created {len(enrollments)} enrollments")

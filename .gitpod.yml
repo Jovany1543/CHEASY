@@ -3,7 +3,7 @@ ports:
     onOpen: open-browser
     visibility: public
   - port: 3001
-    onOpen: open-preview
+    onOpen: open-browser
     visibility: public
 
 tasks:

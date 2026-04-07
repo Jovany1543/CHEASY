@@ -1,8 +1,42 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required
 from models import db, Teacher, Student, Course, Section, Assignment, Submission, Enrollment
 
 api = Blueprint('api', __name__, url_prefix='/api')
+
+USER_FIELDS = ('username', 'first_name', 'last_name', 'email', 'phone_number')
+
+
+def apply_user_updates(user, data):
+    for field in USER_FIELDS:
+        if field in data:
+            setattr(user, field, data[field])
+
+
+def validate_unique_user_fields(model, data, current_id=None):
+    username = data.get('username')
+    if username:
+        existing_user = model.query.filter_by(username=username).first()
+        if existing_user and existing_user.id != current_id:
+            return jsonify({'msg': 'Username already exists'}), 409
+
+    email = data.get('email')
+    if email:
+        existing_email = model.query.filter_by(email=email).first()
+        if existing_email and existing_email.id != current_id:
+            return jsonify({'msg': 'Email already exists'}), 409
+
+    return None
+
+
+def build_access_token(user_id, role):
+    return create_access_token(
+        identity=str(user_id),
+        additional_claims={
+            'user_id': user_id,
+            'role': role,
+        },
+    )
 
 # ===============================
 # AUTH
@@ -13,7 +47,7 @@ def teacher_login():
     data = request.get_json()
     teacher = Teacher.query.filter_by(username=data.get('username')).first()
     if teacher and teacher.check_password(data.get('password')):
-        token = create_access_token(identity={'id': teacher.id, 'role': 'teacher'})
+        token = build_access_token(teacher.id, 'teacher')
         return jsonify(access_token=token), 200
     return jsonify({'msg': 'Invalid credentials'}), 401
 
@@ -22,7 +56,7 @@ def student_login():
     data = request.get_json()
     student = Student.query.filter_by(username=data.get('username')).first()
     if student and student.check_password(data.get('password')):
-        token = create_access_token(identity={'id': student.id, 'role': 'student'})
+        token = build_access_token(student.id, 'student')
         return jsonify(access_token=token), 200
     return jsonify({'msg': 'Invalid credentials'}), 401
 
@@ -45,9 +79,12 @@ def get_teacher(id):
 @api.route('/teachers', methods=['POST'])
 def create_teacher():
     data = request.get_json()
-    if Teacher.query.filter_by(username=data.get('username')).first():
-        return jsonify({'msg': 'Username already exists'}), 409
+    validation_error = validate_unique_user_fields(Teacher, data)
+    if validation_error:
+        return validation_error
+
     teacher = Teacher(username=data['username'])
+    apply_user_updates(teacher, data)
     teacher.set_password(data['password'])
     db.session.add(teacher)
     db.session.commit()
@@ -58,8 +95,11 @@ def create_teacher():
 def update_teacher(id):
     teacher = Teacher.query.get_or_404(id)
     data = request.get_json()
-    if 'username' in data:
-        teacher.username = data['username']
+    validation_error = validate_unique_user_fields(Teacher, data, current_id=teacher.id)
+    if validation_error:
+        return validation_error
+
+    apply_user_updates(teacher, data)
     if 'password' in data:
         teacher.set_password(data['password'])
     db.session.commit()
@@ -92,9 +132,12 @@ def get_student(id):
 @api.route('/students', methods=['POST'])
 def create_student():
     data = request.get_json()
-    if Student.query.filter_by(username=data.get('username')).first():
-        return jsonify({'msg': 'Username already exists'}), 409
+    validation_error = validate_unique_user_fields(Student, data)
+    if validation_error:
+        return validation_error
+
     student = Student(username=data['username'])
+    apply_user_updates(student, data)
     student.set_password(data['password'])
     db.session.add(student)
     db.session.commit()
@@ -105,8 +148,11 @@ def create_student():
 def update_student(id):
     student = Student.query.get_or_404(id)
     data = request.get_json()
-    if 'username' in data:
-        student.username = data['username']
+    validation_error = validate_unique_user_fields(Student, data, current_id=student.id)
+    if validation_error:
+        return validation_error
+
+    apply_user_updates(student, data)
     if 'password' in data:
         student.set_password(data['password'])
     db.session.commit()
@@ -128,7 +174,7 @@ def delete_student(id):
 @jwt_required()
 def get_courses():
     courses = Course.query.all()
-    return jsonify([c.to_dict() for c in courses]), 200
+    return jsonify([course.to_dict() for course in courses]), 200
 
 @api.route('/courses/<int:id>', methods=['GET'])
 @jwt_required()
@@ -140,7 +186,10 @@ def get_course(id):
 @jwt_required()
 def create_course():
     data = request.get_json()
-    course = Course(name=data['name'])
+    course = Course(
+        name=data['name'],
+        description=data.get('description'),
+    )
     db.session.add(course)
     db.session.commit()
     return jsonify(course.to_dict()), 201
@@ -152,6 +201,8 @@ def update_course(id):
     data = request.get_json()
     if 'name' in data:
         course.name = data['name']
+    if 'description' in data:
+        course.description = data['description']
     db.session.commit()
     return jsonify(course.to_dict()), 200
 
@@ -184,7 +235,11 @@ def get_section(id):
 def create_section():
     data = request.get_json()
     Course.query.get_or_404(data['course_id'])  # validate course exists
-    section = Section(name=data['name'], course_id=data['course_id'])
+    section = Section(
+        name=data['name'],
+        description=data['description'],
+        course_id=data['course_id'],
+    )
     db.session.add(section)
     db.session.commit()
     return jsonify(section.to_dict()), 201
@@ -196,6 +251,8 @@ def update_section(id):
     data = request.get_json()
     if 'name' in data:
         section.name = data['name']
+    if 'description' in data:
+        section.description = data['description']
     if 'course_id' in data:
         Course.query.get_or_404(data['course_id'])
         section.course_id = data['course_id']
@@ -230,11 +287,11 @@ def get_assignment(id):
 @jwt_required()
 def create_assignment():
     data = request.get_json()
-    Course.query.get_or_404(data['course_id'])
+    Section.query.get_or_404(data['section_id'])
     assignment = Assignment(
         title=data['title'],
         description=data.get('description'),
-        course_id=data['course_id']
+        section_id=data['section_id']
     )
     db.session.add(assignment)
     db.session.commit()
@@ -249,9 +306,9 @@ def update_assignment(id):
         assignment.title = data['title']
     if 'description' in data:
         assignment.description = data['description']
-    if 'course_id' in data:
-        Course.query.get_or_404(data['course_id'])
-        assignment.course_id = data['course_id']
+    if 'section_id' in data:
+        Section.query.get_or_404(data['section_id'])
+        assignment.section_id = data['section_id']
     db.session.commit()
     return jsonify(assignment.to_dict()), 200
 

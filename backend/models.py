@@ -66,7 +66,7 @@ class Course(db.Model):
         return f'<Course {self.name}>'
 
     def to_dict(self):
-        return {'id': self.id, 'name': self.name}
+        return {'id': self.id, 'name': self.name, 'description': self.description}
     
 class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)

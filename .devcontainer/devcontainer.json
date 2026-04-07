@@ -14,12 +14,15 @@
     },
     "3001": {
       "label": "Backend",
-      "onAutoForward": "openPreview"
+      "onAutoForward": "openBrowserOnce"
     }
   },
   "postCreateCommand": {
     "backend": "cd backend && python -m pip install --user pipenv && python -m pipenv sync",
     "frontend": "cd frontend && npm install"
+  },
+  "postAttachCommand": {
+    "makePortsPublic": "if [ -n \"$CODESPACE_NAME\" ]; then gh codespace ports visibility -c \"$CODESPACE_NAME\" 3000:public 3001:public || true; fi"
   },
   "waitFor": "postCreateCommand",
   "customizations": {
