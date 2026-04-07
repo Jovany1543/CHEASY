@@ -2,6 +2,7 @@
   "name": "CHEASY",
   "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
   "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20"
     }
@@ -21,8 +22,8 @@
     "backend": "cd backend && python -m pip install --user pipenv && python -m pipenv sync",
     "frontend": "cd frontend && npm install"
   },
-  "postAttachCommand": {
-    "makePortsPublic": "if [ -n \"$CODESPACE_NAME\" ]; then gh codespace ports visibility -c \"$CODESPACE_NAME\" 3000:public 3001:public || true; fi"
+  "postStartCommand": {
+    "makePortsPublic": "if command -v gh >/dev/null 2>&1 && [ -n \"$CODESPACE_NAME\" ]; then gh codespace ports visibility -c \"$CODESPACE_NAME\" 3000:public 3001:public >/dev/null 2>&1 || true; fi"
   },
   "waitFor": "postCreateCommand",
   "customizations": {
