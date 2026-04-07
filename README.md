@@ -146,13 +146,15 @@ The codebase contains schema mismatches between `backend/models.py`, `backend/ro
 
 This project expects a root `.env` file for local development, but that file should not be committed.
 
-Use `.env.example` as the template:
+Create it with the helper script:
 
 ```bash
-cp .env.example .env
+/bin/bash scripts/create-env.sh
 ```
 
-Then adjust the values in `.env` for your machine or cloud workspace.
+The script uses localhost values in a normal local workspace and automatically switches to Codespaces preview URLs when `CODESPACE_NAME` is available.
+
+Then adjust any secrets in `.env` for your machine or cloud workspace.
 
 General rule:
 
@@ -160,7 +162,7 @@ General rule:
 - Codespaces and Gitpod may need their preview URLs instead
 - secrets should stay only in `.env`, never in the README and never in git
 
-If the frontend is talking to the wrong backend, the first thing to check is whether `.env` still points at an old preview URL.
+If the frontend is talking to the wrong backend, the first thing to check is whether `.env` still points at an old preview URL. Re-run `/bin/bash scripts/create-env.sh` if the workspace URL changed.
 
 ## Local Development
 
@@ -202,12 +204,13 @@ npm start
 
 The frontend reads the root `.env` file through `env-cmd`.
 
-### Endpoints during local development
+### Endpoints during development
 
-- Frontend: `http://localhost:3000`
-- Backend API/root: `http://localhost:3001`
-- Admin panel: `http://localhost:3001/admin/`
-- Backend login page: `http://localhost:3001/admin-login`
+- Local frontend: `http://localhost:3000`
+- Local backend API/root: `http://localhost:3001`
+- Local admin panel: `http://localhost:3001/admin/`
+- Local backend login page: `http://localhost:3001/admin-login`
+- Codespaces URLs are generated automatically into `.env` as `https://<codespace-name>-3000.<forwarding-domain>` and `https://<codespace-name>-3001.<forwarding-domain>`
 
 ## Zero-to-Working by Environment
 
@@ -243,6 +246,7 @@ If the startup tasks fail on a clean machine, run the dependency setup tasks onc
 
 - provision a Python 3.12 dev container
 - add Node 20
+- generate `.env` with Codespaces preview URLs when it is missing
 - install backend dependencies with Pipenv
 - install frontend dependencies with npm
 - forward ports `3000` and `3001`
@@ -374,7 +378,7 @@ If you are continuing work on CHEASY, the highest-value cleanup path is probably
 
 If you only need the shortest path to a running workspace:
 
-1. Copy `.env.example` to `.env` and set the correct values for your environment.
+1. Run `/bin/bash scripts/create-env.sh` and update any secrets in `.env`.
 2. Start the backend from `backend/` with `pipenv run python app.py`.
 3. Start the frontend from `frontend/` with `npm start`.
 4. Optionally seed the database with `pipenv run python seed.py`.
