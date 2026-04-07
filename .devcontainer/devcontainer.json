@@ -1,0 +1,38 @@
+{
+  "name": "CHEASY",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "forwardPorts": [3000, 3001],
+  "portsAttributes": {
+    "3000": {
+      "label": "Frontend",
+      "onAutoForward": "openBrowserOnce"
+    },
+    "3001": {
+      "label": "Backend",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postCreateCommand": {
+    "backend": "cd backend && python -m pip install --user pipenv && python -m pipenv sync",
+    "frontend": "cd frontend && npm install"
+  },
+  "waitFor": "postCreateCommand",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "task.allowAutomaticTasks": "on"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}

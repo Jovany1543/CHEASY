@@ -1,5 +1,35 @@
-frontend/node_modules/
-frontend/dist/
-frontend/.parcel-cache/
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.python-version
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+
+# Backend local data
+backend/instance/
+
+# Node / frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.parcel-cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / editor noise
+.DS_Store
+Thumbs.db

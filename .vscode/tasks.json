@@ -1,0 +1,81 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Startup: Backend Terminal",
+      "type": "shell",
+      "command": "/bin/bash",
+      "args": [
+        "-lc",
+        "python -m pipenv run python app.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "group": "startup-terminals",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "Startup: Frontend Terminal",
+      "type": "shell",
+      "command": "/bin/bash",
+      "args": ["-lc", "npm start"],
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "group": "startup-terminals",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "Setup: Backend Dependencies",
+      "type": "shell",
+      "command": "/bin/bash",
+      "args": [
+        "-lc",
+        "python -m pip install --user pipenv && python -m pipenv sync"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "presentation": {
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Setup: Frontend Dependencies",
+      "type": "shell",
+      "command": "/bin/bash",
+      "args": ["-lc", "npm install"],
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "presentation": {
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      }
+    }
+  ]
+}
