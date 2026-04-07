@@ -19,12 +19,13 @@
     }
   },
   "postCreateCommand": {
+    "env": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi",
     "backend": "cd backend && python -m pip install --user pipenv && python -m pipenv sync",
     "frontend": "cd frontend && npm install"
   },
   "postAttachCommand": {
-    "backend": "cd backend && python -m pipenv run python app.py",
-    "frontend": "cd frontend && npm start"
+    "backend": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi && cd backend && python -m pipenv run python app.py",
+    "frontend": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi && cd frontend && npm start"
   },
   "postStartCommand": {
     "makePortsPublic": "if command -v gh >/dev/null 2>&1 && [ -n \"$CODESPACE_NAME\" ]; then gh codespace ports visibility -c \"$CODESPACE_NAME\" 3000:public 3001:public >/dev/null 2>&1 || true; fi"
