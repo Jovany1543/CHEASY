@@ -18,6 +18,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///che
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret-key-change-me')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 CORS(app)
 

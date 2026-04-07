@@ -1,6 +1,6 @@
 import { useState } from "react";
-
-const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:3001/api";
+import { useNavigate } from "react-router-dom";
+import { useStore } from "../flux/appContext";
 
 // ── tiny helpers ──────────────────────────────────────────────────────────────
 const Badge = ({ role }) => (
@@ -23,6 +23,8 @@ const Alert = ({ msg, type }) =>
 
 // ── LOGIN PAGE ────────────────────────────────────────────────────────────────
 function LoginPage({ onSwitch }) {
+  const { actions } = useStore();
+  const navigate = useNavigate();
   const [role, setRole] = useState("teacher");
   const [form, setForm] = useState({ username: "", password: "" });
   const [status, setStatus] = useState({ msg: "", type: "" });
@@ -35,19 +37,13 @@ function LoginPage({ onSwitch }) {
     setLoading(true);
     setStatus({ msg: "", type: "" });
     try {
-      const res = await fetch(`${API}/${role}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("role", role);
+      const result = await actions.login(role, form);
+      if (result.ok) {
         setStatus({ msg: `✓ Logged in as ${role}. Token saved.`, type: "success" });
         setForm({ username: "", password: "" });
+        navigate("/dashboard");
       } else {
-        setStatus({ msg: data.msg || "Login failed.", type: "danger" });
+        setStatus({ msg: result.message, type: "danger" });
       }
     } catch {
       setStatus({ msg: "Could not reach the server.", type: "danger" });
@@ -174,6 +170,7 @@ function LoginPage({ onSwitch }) {
 
 // ── REGISTER PAGE ─────────────────────────────────────────────────────────────
 function RegisterPage({ onSwitch }) {
+  const { actions } = useStore();
   const [role, setRole] = useState("teacher");
   const [form, setForm] = useState({ username: "", password: "", confirm: "" });
   const [status, setStatus] = useState({ msg: "", type: "" });
@@ -189,19 +186,16 @@ function RegisterPage({ onSwitch }) {
     }
     setLoading(true);
     setStatus({ msg: "", type: "" });
-    const endpoint = role === "teacher" ? `${API}/teachers` : `${API}/students`;
     try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: form.username, password: form.password }),
+      const result = await actions.register(role, {
+        username: form.username,
+        password: form.password,
       });
-      const data = await res.json();
-      if (res.ok) {
-        setStatus({ msg: `✓ ${role.charAt(0).toUpperCase() + role.slice(1)} "${data.username}" created successfully!`, type: "success" });
+      if (result.ok) {
+        setStatus({ msg: `✓ ${role.charAt(0).toUpperCase() + role.slice(1)} "${result.data.username}" created successfully!`, type: "success" });
         setForm({ username: "", password: "", confirm: "" });
       } else {
-        setStatus({ msg: data.msg || "Registration failed.", type: "danger" });
+        setStatus({ msg: result.message, type: "danger" });
       }
     } catch {
       setStatus({ msg: "Could not reach the server.", type: "danger" });
