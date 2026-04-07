@@ -25,13 +25,9 @@
   },
   "postAttachCommand": {
     "backend": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi && cd backend && python -m pipenv run python app.py",
-    "frontend": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi && cd frontend && npm start",
-    "openFrontend": "if [ -n \"$CODESPACE_NAME\" ] && [ -n \"$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN\" ]; then \"$BROWSER\" \"https://${CODESPACE_NAME}-3000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}\" >/dev/null 2>&1 || true; fi",
-    "openBackend": "if [ -n \"$CODESPACE_NAME\" ] && [ -n \"$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN\" ]; then \"$BROWSER\" \"https://${CODESPACE_NAME}-3001.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}\" >/dev/null 2>&1 || true; fi"
+    "frontend": "if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi && cd frontend && npm start"
   },
-  "postStartCommand": {
-    "makePortsPublic": "if command -v gh >/dev/null 2>&1 && [ -n \"$CODESPACE_NAME\" ]; then gh codespace ports visibility -c \"$CODESPACE_NAME\" 3000:public 3001:public >/dev/null 2>&1 || true; fi"
-  },
+  "postStartCommand": "if command -v gh >/dev/null 2>&1 && [ -n \"$CODESPACE_NAME\" ]; then gh codespace ports visibility -c \"$CODESPACE_NAME\" 3000:public 3001:public >/dev/null 2>&1 || true; fi && if [ -n \"$CODESPACE_NAME\" ] && [ -n \"$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN\" ]; then \"$BROWSER\" \"https://${CODESPACE_NAME}-3000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}\" >/dev/null 2>&1 || true; \"$BROWSER\" \"https://${CODESPACE_NAME}-3001.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}\" >/dev/null 2>&1 || true; fi",
   "waitFor": "postCreateCommand",
   "customizations": {
     "vscode": {
